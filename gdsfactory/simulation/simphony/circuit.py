@@ -1,7 +1,7 @@
 from typing import Dict
 
-from simphony.elements import Model
-from simphony.netlist import Subcircuit
+from simphony import Model
+from simphony.layout import Circuit
 
 import gdsfactory as gf
 from gdsfactory.component import Component
@@ -12,7 +12,7 @@ from gdsfactory.simulation.simphony.types import ModelFactory
 def component_to_circuit(
     component: Component,
     model_factory: Dict[str, ModelFactory] = model_factory,
-) -> Subcircuit:
+) -> Circuit:
     """Returns Simphony circuit from a gdsfactory component netlist.
 
     Args:
@@ -23,10 +23,8 @@ def component_to_circuit(
     instances = netlist["instances"]
     connections = netlist["connections"]
 
-    circuit = Subcircuit(component.name)
-    model_names = []
-    model_name_tuple = []
     component_models = list(model_factory.keys())
+    components = {}
 
     for name, metadata in instances.items():
         component_type = metadata["component"]
@@ -35,7 +33,6 @@ def component_to_circuit(
 
         if component_type is None:
             raise ValueError(f"instance {name!r} has no component_type")
-            # continue
 
         if component_type not in model_factory:
             raise ValueError(
@@ -45,20 +42,19 @@ def component_to_circuit(
         model = model_function(**component_settings)
         if not isinstance(model, Model):
             raise ValueError(f"model {model!r} is not a simphony Model")
-        model_names.append(name)
-        model_name_tuple.append((model, name))
 
-    circuit.add(model_name_tuple)
+        components[name] = model
 
     for k, v in connections.items():
-        model1_name, port1_name = k.split(",")
-        model2_name, port2_name = v.split(",")
+        c1name, port1_name = k.split(",")
+        c2name, port2_name = v.split(",")
 
-        if model1_name in model_names and model2_name in model_names:
-            circuit.connect(model1_name, port1_name, model2_name, port2_name)
+        if c1name in components and c2name in components:
+            c1 = components[c1name]
+            c2 = components[c2name]
+            c1.connect(c2[port2_name])
 
-    circuit.info = netlist
-    return circuit
+    return Circuit(components.values())
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from simphony.netlist import Subcircuit
+from simphony.models import Subcircuit
 
 from gdsfactory.simulation.simphony.components.bend_circular import bend_circular
 from gdsfactory.simulation.simphony.components.coupler_ring import coupler_ring

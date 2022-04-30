@@ -1,5 +1,5 @@
-from simphony.netlist import Subcircuit
-from simphony.simulation import SweepSimulation
+from simphony.models import Subcircuit
+from simphony.simulators import SweepSimulation
 from simphony.tools import freq2wl
 
 

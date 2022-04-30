@@ -1,5 +1,5 @@
-from simphony.library import siepic
-from simphony.netlist import Subcircuit
+from simphony.libraries import siepic
+from simphony.models import Subcircuit
 
 from gdsfactory.simulation.simphony.components.mmi1x2 import mmi1x2
 
